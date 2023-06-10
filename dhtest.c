@@ -454,8 +454,8 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'T':
-				if(atoi(optarg) < 5 || atoi(optarg) > 3600) {
-					fprintf(stdout, "Invalid timout value. Range 5 to 3600\n");
+				if(atoi(optarg) < 1 || atoi(optarg) > 3600) {
+					fprintf(stdout, "Invalid timout value. Range 1 to 3600\n");
 					exit(2);
 				}
 				timeout = atoi(optarg);
