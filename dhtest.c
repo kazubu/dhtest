@@ -52,7 +52,7 @@ u_char iface_mac[ETHER_ADDR_LEN] = { 0 };
 u_int8_t no_custom_dhcp_options = { 0 };
 struct custom_dhcp_option_hdr custom_dhcp_options[MAX_CUSTOM_DHCP_OPTIONS];
 
-char dhmac_fname[20];
+char dhmac_fname[50];
 char rtrmac_fname[20];
 char iface_name[30] = { 0 };
 char ip_str[128];
@@ -544,7 +544,9 @@ int main(int argc, char *argv[])
 	    }
 
 	  /** build the file name used fot saving lease informations */
-	  strcpy(dhmac_fname, mac2str(dhmac));
+	  strcpy(dhmac_fname, iface_name);
+	  strcpy(dhmac_fname + strlen(iface_name), "_");
+	  strcpy(dhmac_fname + strlen(iface_name) + 1, mac2str(dhmac));
 	} else {
           /* dhmac_flag is set and strict_mac_flag is not set */
           memcpy (iface_mac, dhmac, ETHER_ADDR_LEN);

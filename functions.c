@@ -76,7 +76,7 @@ extern u_char rtrmac[ETHER_ADDR_LEN];
 extern u_char dmac[ETHER_ADDR_LEN];
 extern u_char iface_mac[ETHER_ADDR_LEN];
 
-extern char dhmac_fname[20];
+extern char dhmac_fname[50];
 extern char iface_name[30];
 extern char ip_str[128];
 extern u_int32_t server_id, option50_ip;
