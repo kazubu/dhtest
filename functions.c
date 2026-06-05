@@ -407,7 +407,12 @@ int recv_packet(int pkt_type)
 	int ret = -1, sock_len, retval, chk_pkt_state;
 	fd_set read_fd;
 	struct timeval tval;
-	tval.tv_sec = 5;
+	/*
+	 * Cap the select() wait to the command timeout (-T) when it is
+	 * shorter than the default, so a sub-5-second timeout is honoured
+	 * instead of always blocking for the full 5 seconds.
+	 */
+	tval.tv_sec = (timeout && timeout < 5) ? timeout : 5;
 	tval.tv_usec = 0;
 
 	if(pkt_type == DHCP_MSGOFFER) {
