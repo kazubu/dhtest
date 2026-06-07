@@ -715,6 +715,7 @@ int build_option55()
                 memcpy((dhopt_buff + dhopt_size + 2), option55_req_list, option55_req_len);
                 dhopt_size = dhopt_size + option55_req_len + 2;
 	}
+	return 0;
 }
 
 /*
