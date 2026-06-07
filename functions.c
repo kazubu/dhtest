@@ -40,7 +40,8 @@ extern u_int8_t dhopt_buff[500];
 extern u_int32_t dhopt_size;
 extern u_int32_t dhcp_xid;
 extern u_int32_t bcast_flag;
-extern u_int8_t timeout;
+extern u_int16_t timeout;
+extern time_t time_last;
 extern u_int8_t rtrmac_flag;
 extern u_int8_t padding_flag;
 extern u_int8_t vci_buff[256];
@@ -408,15 +409,23 @@ int recv_packet(int pkt_type)
 	fd_set read_fd;
 	struct timeval tval;
 	/*
-	 * Cap the select() wait to the command timeout (-T) when it is
-	 * shorter than the default, so a sub-5-second timeout is honoured
-	 * instead of always blocking for the full 5 seconds.
+	 * Cap the select() wait to the time remaining in the command-timeout
+	 * (-T) budget, capped at 5s per receive so DISCOVER/REQUEST are still
+	 * resent periodically. This bounds the total run time to the requested
+	 * -T value (time_last is set once before the DISCOVER loop in dhtest.c)
+	 * instead of allowing each phase to wait a full timeout of its own.
 	 */
-	tval.tv_sec = (timeout && timeout < 5) ? timeout : 5;
+	if (timeout) {
+		time_t remaining = (time_t)timeout - (time(NULL) - time_last);
+		if (remaining < 0) remaining = 0;
+		tval.tv_sec = remaining < 5 ? remaining : 5;
+	} else {
+		tval.tv_sec = 5;
+	}
 	tval.tv_usec = 0;
 
 	if(pkt_type == DHCP_MSGOFFER) {
-		while(tval.tv_sec != 0) {
+		while(tval.tv_sec != 0 || tval.tv_usec != 0) {
 			FD_ZERO(&read_fd);
 			FD_SET(sock_packet, &read_fd);
 			retval = select(sock_packet + 1, &read_fd, NULL, NULL, &tval);
@@ -442,7 +451,7 @@ int recv_packet(int pkt_type)
 		}
 		return DHCP_DISC_RESEND;
 	} else if(pkt_type == DHCP_MSGACK) {
-		while(tval.tv_sec != 0) {
+		while(tval.tv_sec != 0 || tval.tv_usec != 0) {
 			FD_ZERO(&read_fd);
 			FD_SET(sock_packet, &read_fd);
 			retval = select(sock_packet + 1, &read_fd, NULL, NULL, &tval);
